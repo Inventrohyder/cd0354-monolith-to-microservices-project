@@ -1,0 +1,222 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "4d72056d-91e9-44c6-a58e-49bc388e2dae": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 110,
+          "y": 90
+        },
+        "z": 0,
+        "embeds": []
+      },
+      "9c2755f9-ca3a-49a8-988d-9d1e44b57a33": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 40,
+          "y": 160
+        },
+        "z": 0,
+        "embeds": [],
+        "dependson": [
+          "4d72056d-91e9-44c6-a58e-49bc388e2dae"
+        ]
+      },
+      "63ec427e-9fae-4aa1-84e5-8ea6abcd70c8": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 100
+        },
+        "z": 0,
+        "embeds": [],
+        "dependson": [
+          "4c337bee-537f-42b7-a635-5287d492821b"
+        ]
+      },
+      "4c337bee-537f-42b7-a635-5287d492821b": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 230,
+          "y": 180
+        },
+        "z": 0,
+        "embeds": []
+      }
+    }
+  },
+  "Parameters": {
+    "DBUsername": {
+      "NoEcho": true,
+      "Type": "String",
+      "MinLength": 1,
+      "MaxLength": 16,
+      "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+      "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters.",
+      "Default": "postgres"
+    },
+    "DBPassword": {
+      "NoEcho": true,
+      "Type": "String",
+      "MinLength": 8,
+      "MaxLength": 41,
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription": "must contain only alphanumeric characters."
+    }
+  },
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "CorsConfiguration": {
+          "CorsRules": [
+            {
+              "AllowedHeaders": [
+                "*"
+              ],
+              "AllowedMethods": [
+                "POST",
+                "GET",
+                "PUT",
+                "DELETE",
+                "HEAD"
+              ],
+              "AllowedOrigins": [
+                "*"
+              ],
+              "ExposedHeaders": []
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "4d72056d-91e9-44c6-a58e-49bc388e2dae"
+        }
+      },
+      "DeletionPolicy": "Delete"
+    },
+    "S3BucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3Bucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Stmt1625306057759",
+              "Principal": "*",
+              "Action": "s3:*",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Sub": "arn:aws:s3:::${S3Bucket}/*"
+              }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9c2755f9-ca3a-49a8-988d-9d1e44b57a33"
+        }
+      },
+      "DependsOn": [
+        "S3Bucket"
+      ]
+    },
+    "RDSInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": "20",
+        "DBInstanceClass": "db.t3.micro",
+        "DBName": "postgres",
+        "Engine": "postgres",
+        "EngineVersion": "13.4",
+        "PubliclyAccessible": true,
+        "MasterUsername": {
+          "Ref": "DBUsername"
+        },
+        "MasterUserPassword": {
+          "Ref": "DBPassword"
+        },
+        "VPCSecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "SecurityGroup",
+              "GroupId"
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "63ec427e-9fae-4aa1-84e5-8ea6abcd70c8"
+        }
+      },
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "SecurityGroup"
+      ]
+    },
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Project Security Group",
+        "GroupName": "mono-to-micro",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "4c337bee-537f-42b7-a635-5287d492821b"
+        }
+      },
+      "DeletionPolicy": "Delete"
+    }
+  },
+  "Outputs": {
+    "BucketName": {
+      "Value": {
+        "Ref": "S3Bucket"
+      },
+      "Description": "The S3 Bucket created."
+    },
+    "DBEndpoint": {
+      "Value": {
+        "Fn::GetAtt": [
+          "RDSInstance",
+          "Endpoint.Address"
+        ]
+      },
+      "Description": "The database address"
+    },
+    "DBPort": {
+      "Value": {
+        "Fn::GetAtt": [
+          "RDSInstance",
+          "Endpoint.Port"
+        ]
+      },
+      "Description": "The database port"
+    }
+  }
+}
