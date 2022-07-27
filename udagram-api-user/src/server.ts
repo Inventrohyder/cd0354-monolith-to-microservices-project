@@ -8,15 +8,24 @@ import bodyParser from 'body-parser';
 import { config } from './config/config';
 import { V0_USER_MODELS } from './controllers/v0/model.index';
 
+import { logger } from './utils/logger';
+import addRequestId from 'express-request-id';
+import { endHttpLogger, startHttpLogger } from './utils/httpLogger';
 
 (async (): Promise<void> => {
   await sequelize.addModels(V0_USER_MODELS);
 
-  console.debug("Initialize database connection...");
+  logger.debug("Initialize database connection...");
   await sequelize.sync();
 
   const app = express();
   const port = process.env.PORT || 8080;
+
+
+  app.use(addRequestId({ setHeader: false }));
+
+  app.use(startHttpLogger);
+  app.use(endHttpLogger);
 
   app.use(bodyParser.json());
 
@@ -41,10 +50,9 @@ import { V0_USER_MODELS } from './controllers/v0/model.index';
     res.send('/api/v0/');
   });
 
-
   // Start the Server
   app.listen(port, () => {
-    console.log(`server running ${config.url}`);
-    console.log(`press CTRL+C to stop server`);
+    logger.info(`server running ${config.url}`);
+    logger.info(`press CTRL+C to stop server`);
   });
 })();
