@@ -7,6 +7,13 @@ The project is split into two parts:
 1. Frontend - Angular web application built with Ionic Framework
 2. Backend RESTful API - Node-Express application
 
+## Inventrohyder's Project Submission
+
+@Inventrohyder's project submission is documented in the [setup.ipynb](./setup.ipynb) file.
+
+The documentation is a jupyter notebook that is setup with python.
+The dependencies are in [requirements.txt](./requirements.txt).
+
 ## Getting Started
 
 > _tip_: it's recommended that you start with getting the backend API running since the frontend web application depends on the API.

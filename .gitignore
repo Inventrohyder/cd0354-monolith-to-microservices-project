@@ -46,3 +46,6 @@ venv/
 set_env.sh
 env-secret.yml
 aws-secret.yml
+
+# Python Environment
+.venv
