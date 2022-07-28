@@ -1,7 +1,7 @@
 version: '0.0.1'
 services:
   reverseproxy:
-    image: reverseproxy
+    image: inventrohyder/reverseproxy
     ports:
       - 8080:8080
     restart: always
@@ -9,7 +9,7 @@ services:
       - backend_user
       - backend_feed
   backend_user:
-    image: udagram-api-user
+    image: inventrohyder/udagram-api-user
     environment:
       - POSTGRES_USERNAME=$POSTGRES_USERNAME
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
@@ -23,7 +23,7 @@ services:
   backend_feed:
     volumes:
       - $HOME/.aws:/root/.aws
-    image: udagram-api-feed
+    image: inventrohyder/udagram-api-feed
     environment:
       - POSTGRES_USERNAME=$POSTGRES_USERNAME
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
@@ -35,6 +35,6 @@ services:
       - JWT_SECRET=$JWT_SECRET
       - URL=$URL
   frontend:
-    image: udagram-frontend:local
+    image: inventrohyder/udagram-frontend
     ports:
       - 8100:80
