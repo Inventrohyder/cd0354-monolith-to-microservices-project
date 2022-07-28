@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-user
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-user
+  template:
+    metadata:
+      labels:
+        app: backend-user
+    spec:
+      containers:
+        - name: backend-user
+          image: inventrohyder/udagram-api-user
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: postgres_host
+            - name: URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: url
+          envFrom:
+            - secretRef:
+                name: app-secret
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-feed
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-feed
+  template:
+    metadata:
+      labels:
+        app: backend-feed
+    spec:
+      volumes:
+        - name: aws-credentials-volume
+          secret:
+            name: app-aws-secret
+      containers:
+        - name: backend-feed
+          image: inventrohyder/udagram-api-feed
+          volumeMounts:
+            - name: aws-credentials-volume
+              readOnly: true
+              mountPath: /root/.aws/
+          env:
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: postgres_host
+            - name: AWS_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: aws_bucket
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: aws_region
+            - name: AWS_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: aws_profile
+            - name: URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: url
+          envFrom:
+            - secretRef:
+                name: app-secret
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: reverseproxy
+  name: reverseproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: reverseproxy
+  template:
+    metadata:
+      labels:
+        service: reverseproxy
+    spec:
+      containers:
+        - name: reverseproxy
+          image: inventrohyder/reverseproxy
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8080
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: inventrohyder/udagram-frontend
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8100
