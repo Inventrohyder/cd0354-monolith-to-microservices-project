@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-user-svc
+  name: backend-user
 spec:
   selector:
     app: backend-user
@@ -14,7 +14,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-feed-svc
+  name: backend-feed
 spec:
   selector:
     app: backend-feed
@@ -27,21 +27,20 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    service: reverseproxy
-  name: reverseproxy-svc
+  name: reverseproxy
 spec:
   selector:
     app: reverseproxy
   ports:
     - port: 8080
       targetPort: 8080
+  type: ClusterIP
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-svc
+  name: frontend
 spec:
   selector:
     app: frontend

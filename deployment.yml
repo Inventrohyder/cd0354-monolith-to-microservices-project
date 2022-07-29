@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: backend-user
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend-user
@@ -21,6 +21,11 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: postgres_host
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  key: postgres_db
+                  name: app-config
             - name: URL
               valueFrom:
                 configMapKeyRef:
@@ -32,15 +37,12 @@ spec:
           ports:
             - containerPort: 8080
           resources:
-            limits:
-              memory: "128Mi"
+            requests:
+              memory: "512Mi"
               cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
 
 ---
 apiVersion: apps/v1
@@ -60,7 +62,7 @@ spec:
       volumes:
         - name: aws-credentials-volume
           secret:
-            name: app-aws-secret
+            secretName: app-aws-secret
       containers:
         - name: backend-feed
           image: inventrohyder/udagram-api-feed
@@ -69,11 +71,18 @@ spec:
               readOnly: true
               mountPath: /root/.aws/
           env:
+            - name: NODE_OPTIONS
+              value: --max_old_space_size=4096
             - name: POSTGRES_HOST
               valueFrom:
                 configMapKeyRef:
                   name: app-config
                   key: postgres_host
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  key: postgres_db
+                  name: app-config
             - name: AWS_BUCKET
               valueFrom:
                 configMapKeyRef:
@@ -100,15 +109,11 @@ spec:
           ports:
             - containerPort: 8080
           resources:
+            requests:
+              memory: "512Mi"
             limits:
-              memory: "128Mi"
+              memory: "1024Mi"
               cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3
 
 ---
 apiVersion: apps/v1
@@ -121,11 +126,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      service: reverseproxy
+      app: reverseproxy
   template:
     metadata:
       labels:
-        service: reverseproxy
+        app: reverseproxy
     spec:
       containers:
         - name: reverseproxy
