@@ -49,3 +49,6 @@ aws-secret.yml
 
 # Python Environment
 .venv
+
+# Github self-hosted runner
+actions-runner/
