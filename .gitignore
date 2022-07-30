@@ -50,5 +50,8 @@ aws-secret.yml
 # Python Environment
 .venv
 
+# Notebook checkpoints
+.ipynb_checkpoints/
+
 # Github self-hosted runner
 actions-runner/
