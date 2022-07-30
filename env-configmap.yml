@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
-  postgres_host: mrl0s75czp1fol.crxb2aefz7m1.us-east-1.rds.amazonaws.com
+  postgres_host: mr1fm3a15zjrrvp.crxb2aefz7m1.us-east-1.rds.amazonaws.com
   postgres_db: postgres
-  aws_bucket: mono-to-micro-project-s3bucket-15scah0gdq491
+  aws_bucket: mono-to-micro-project-s3bucket-sf67os5rjm6b
   aws_region: us-east-1
   aws_profile: UdacityFull
-  url: http://localhost:8100
+  url: http://a139e703429fe46d2ada67281d885a44-1684113403.us-east-1.elb.amazonaws.com:8100
