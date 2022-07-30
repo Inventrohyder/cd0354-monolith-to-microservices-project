@@ -69,7 +69,7 @@ spec:
           volumeMounts:
             - name: aws-credentials-volume
               readOnly: true
-              mountPath: /root/.aws/
+              mountPath: "/root/.aws/"
           env:
             - name: NODE_OPTIONS
               value: --max_old_space_size=4096
@@ -166,4 +166,4 @@ spec:
               memory: "128Mi"
               cpu: "500m"
           ports:
-            - containerPort: 8100
+            - containerPort: 80
